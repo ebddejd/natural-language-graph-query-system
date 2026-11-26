@@ -3,7 +3,7 @@ services:
     name: natural-language-graph-query
     runtime: docker
     plan: free
-    healthCheckPath: /api/health
+    healthCheckPath: /healthz
     envVars:
       - key: PYTHONUNBUFFERED
         value: "1"

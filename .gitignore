@@ -1,0 +1,17 @@
+.env
+__pycache__/
+engine/graph_engine
+.DS_Store
+
+generator/rgen
+
+.venv/
+.env.*
+*.zip
+
+!data/grt/*.zip
+.terraform/
+*.tfstate*
+*.tfvars
+.ruff_cache/
+.terraform/

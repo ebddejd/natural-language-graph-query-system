@@ -1,0 +1,175 @@
+{
+  "uid": "waterloo-journey",
+  "title": "Waterloo Journey Agent",
+  "schemaVersion": 40,
+  "panels": [
+    {
+      "id": 1,
+      "title": "HTTP requests/s",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "journey-prom"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(journey_http_seconds_count[5m]))",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 7
+      }
+    },
+    {
+      "id": 2,
+      "title": "HTTP error ratio",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "journey-prom"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(journey_http_seconds_count{status=~\"[45]..\"}[5m])) / sum(rate(journey_http_seconds_count[5m]))",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 7
+      }
+    },
+    {
+      "id": 3,
+      "title": "Navigation p50 seconds",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "journey-prom"
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50,sum by(le)(rate(journey_http_seconds_bucket{route=\"/api/navigation\"}[5m])))",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 7,
+        "w": 12,
+        "h": 7
+      }
+    },
+    {
+      "id": 4,
+      "title": "Navigation p95 seconds",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "journey-prom"
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95,sum by(le)(rate(journey_http_seconds_bucket{route=\"/api/navigation\"}[5m])))",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 12,
+        "y": 7,
+        "w": 12,
+        "h": 7
+      }
+    },
+    {
+      "id": 5,
+      "title": "Tokens/s by kind",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "journey-prom"
+      },
+      "targets": [
+        {
+          "expr": "sum by(kind)(rate(journey_llm_tokens_total[5m]))",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 14,
+        "w": 12,
+        "h": 7
+      }
+    },
+    {
+      "id": 6,
+      "title": "Estimated USD/hour (configured prices)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "journey-prom"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(journey_llm_estimated_usd_total[5m])) * 3600",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 12,
+        "y": 14,
+        "w": 12,
+        "h": 7
+      }
+    },
+    {
+      "id": 7,
+      "title": "Tool success ratio",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "journey-prom"
+      },
+      "targets": [
+        {
+          "expr": "sum by(name)(rate(journey_tool_calls_total{outcome=\"success\"}[5m])) / sum by(name)(rate(journey_tool_calls_total[5m]))",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 21,
+        "w": 12,
+        "h": 7
+      }
+    },
+    {
+      "id": 8,
+      "title": "Routing failure ratio",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "journey-prom"
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(journey_map_requests_total{route=\"routing\",outcome=\"error\"}[5m])) / sum(rate(journey_map_requests_total{route=\"routing\"}[5m]))",
+          "refId": "A"
+        }
+      ],
+      "gridPos": {
+        "x": 12,
+        "y": 21,
+        "w": 12,
+        "h": 7
+      }
+    }
+  ]
+}

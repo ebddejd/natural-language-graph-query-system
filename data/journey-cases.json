@@ -1,0 +1,240 @@
+[
+  {
+    "id": 1,
+    "text": "From UW to Conestoga Mall by bus.",
+    "expect": {
+      "origin": "uw",
+      "destination": "mall",
+      "modes": [
+        "transit"
+      ]
+    }
+  },
+  {
+    "id": 2,
+    "text": "从 Conestoga Mall 步行到 UW。",
+    "expect": {
+      "origin": "mall",
+      "destination": "uw",
+      "modes": [
+        "walk"
+      ]
+    }
+  },
+  {
+    "id": 3,
+    "text": "Drive from Waterloo Public Library Main to UW.",
+    "expect": {
+      "origin": "library",
+      "destination": "uw",
+      "modes": [
+        "drive"
+      ]
+    }
+  },
+  {
+    "id": 4,
+    "text": "明早九点从 UW 出发去 Conestoga Mall。",
+    "expect": {
+      "time": "2027-05-04T09:00",
+      "origin": "uw",
+      "destination": "mall"
+    }
+  },
+  {
+    "id": 5,
+    "text": "I need to arrive tomorrow by 9 am.",
+    "expect": {
+      "time": "2027-05-04T09:00",
+      "time_kind": "arrive"
+    }
+  },
+  {
+    "id": 6,
+    "text": "今天下午三点出发。",
+    "expect": {
+      "time": "2027-05-03T15:00"
+    }
+  },
+  {
+    "id": 7,
+    "text": "Drive if transit takes over three quarters of an hour.",
+    "expect": {
+      "fallback_drive_over_minutes": 45
+    }
+  },
+  {
+    "id": 8,
+    "text": "公交超过三刻钟就查驾车。",
+    "expect": {
+      "fallback_drive_over_minutes": 45
+    }
+  },
+  {
+    "id": 9,
+    "text": "Bus first; if it takes over 45 mins, try driving.",
+    "expect": {
+      "fallback_drive_over_minutes": 45
+    }
+  },
+  {
+    "id": 10,
+    "text": "从 UW 去 Conestoga Mall，bus 超过 45 min 就 drive。",
+    "expect": {
+      "fallback_drive_over_minutes": 45,
+      "origin": "uw",
+      "destination": "mall"
+    }
+  },
+  {
+    "id": 11,
+    "text": "公交不超过一小时就坐公交，否则看看开车。",
+    "expect": {
+      "fallback_drive_over_minutes": 60
+    }
+  },
+  {
+    "id": 12,
+    "text": "公交太久就开车。",
+    "expect": {
+      "question": true
+    }
+  },
+  {
+    "id": 13,
+    "text": "Keep total walking under or equal to 10 minutes.",
+    "expect": {
+      "max_walk_minutes": 10
+    }
+  },
+  {
+    "id": 14,
+    "text": "一次车都不想换。",
+    "expect": {
+      "max_transfers": 0
+    }
+  },
+  {
+    "id": 15,
+    "text": "One transfer is fine, but no more.",
+    "expect": {
+      "max_transfers": 1
+    }
+  },
+  {
+    "id": 16,
+    "text": "坐公交，但避开 ION。",
+    "expect": {
+      "avoid_rail": true
+    }
+  },
+  {
+    "id": 17,
+    "text": "Compare walking and driving.",
+    "expect": {
+      "modes": [
+        "walk",
+        "drive"
+      ]
+    }
+  },
+  {
+    "id": 18,
+    "text": "找走路最少的方案。",
+    "expect": {
+      "preference": "least_walking"
+    }
+  },
+  {
+    "id": 19,
+    "text": "Prefer the shortest distance.",
+    "expect": {
+      "preference": "shortest"
+    }
+  },
+  {
+    "id": 20,
+    "text": "换乘越少越好。",
+    "expect": {
+      "preference": "fewest_transfers"
+    }
+  },
+  {
+    "id": 21,
+    "text": "算了，改成 30 分钟。",
+    "expect": {
+      "fallback_drive_over_minutes": 30
+    },
+    "prior": 7
+  },
+  {
+    "id": 22,
+    "text": "Make that 5 minutes.",
+    "expect": {
+      "max_walk_minutes": 5
+    },
+    "prior": 13
+  },
+  {
+    "id": 23,
+    "text": "一次换乘也可以。",
+    "expect": {
+      "max_transfers": 1
+    },
+    "prior": 14
+  },
+  {
+    "id": 24,
+    "text": "ION is fine now.",
+    "expect": {
+      "avoid_rail": false
+    },
+    "prior": 16
+  },
+  {
+    "id": 25,
+    "text": "取消步行时间限制。",
+    "expect": {
+      "max_walk_minutes": null
+    },
+    "prior": 13
+  },
+  {
+    "id": 26,
+    "text": "Same time, but I need to arrive by then.",
+    "expect": {
+      "time": "2027-05-04T09:00",
+      "time_kind": "arrive"
+    },
+    "prior": 4
+  },
+  {
+    "id": 27,
+    "text": "把终点改成 Waterloo Public Library Main。",
+    "expect": {
+      "destination": "library"
+    },
+    "prior": 7
+  },
+  {
+    "id": 28,
+    "text": "Get me to school.",
+    "expect": {
+      "question": true
+    }
+  },
+  {
+    "id": 29,
+    "text": "Choose option two.",
+    "expect": {
+      "selection": "unavailable"
+    }
+  },
+  {
+    "id": 30,
+    "text": "选第二条。",
+    "expect": {
+      "selection": 2
+    }
+  }
+]
