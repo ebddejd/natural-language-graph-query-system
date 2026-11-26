@@ -49,6 +49,18 @@ including cross-instance state restoration and stale revision rejection. The
 JavaScript geolocation check and Ruff correctness checks passed. Terraform
 init and validate succeeded for ops/cloud. No cloud resources were created.
 
+GitHub Actions also passed Docker build, real Redis regression tests, kind pod
+replacement and an isolated CPU-load HPA check (at least three ready app replicas
+from two). HPA used a local metrics server and an offline liveness-based readiness
+override; provider reachability was not part of that experiment.
+[Verification run](https://github.com/ebddejd/natural-language-graph-query-system/actions/runs/45896160461).
+The live extraction gate failed for missing provider configuration, so release was skipped.
+
+![Grafana during simulated HTTP navigation traffic](reports/grafana-synthetic.png)
+
+This dashboard capture used simulated model latency without provider usage or a
+map request. Token and routing panels therefore have no observations.
+
 HTTP benchmark: k6 + Waitress on loopback, 3 navigation turns per virtual user,
 30 ms simulated model, no live provider, no confirmed endpoints or map-routing
 latency. Admission allowed two active requests. With a 4-position queue,
@@ -199,7 +211,7 @@ Initial local runs: demo **72/72**, structured **66/66**. These are template-bas
 - `tests/`: algorithm, concurrency, failure, API and provider-contract tests.
 - `evaluate.py`, `benchmark.py`: correctness and local performance harnesses.
 
-Original source directory: `/Users/ethan/Documents/Codex/2026-09-09/prove-that-there-cannot-exist-integers/output/a3`. Original A3 is not modified. A3's random street generator is copied into generator/ and adapted to emit one batch; its geometry code provides street-to-edge membership. The original A3 driver is not used. Graphs are deliberately stable explicit snapshots, enabling reproducible AI evaluation. `PROVENANCE.json` records hashes of the copied source files.
+Original source directory: `<local-project-path>`. Original A3 is not modified. A3's random street generator is copied into generator/ and adapted to emit one batch; its geometry code provides street-to-edge membership. The original A3 driver is not used. Graphs are deliberately stable explicit snapshots, enabling reproducible AI evaluation. `PROVENANCE.json` records hashes of the copied source files.
 
 ## Limits and next steps
 
