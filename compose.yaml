@@ -1,0 +1,24 @@
+services:
+  agent:
+    build: .
+    environment:
+      PUBLIC_URL: http://localhost:10000
+      REDIS_URL: redis://redis:6379/0
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL: ${LLM_MODEL:-}
+      INPUT_USD_PER_M: ${INPUT_USD_PER_M:-}
+      OUTPUT_USD_PER_M: ${OUTPUT_USD_PER_M:-}
+      CACHED_USD_PER_M: ${CACHED_USD_PER_M:-}
+      GEOAPIFY_API_KEY: ${GEOAPIFY_API_KEY:-}
+    ports: ["127.0.0.1:10000:10000"]
+    depends_on: [redis]
+  redis:
+    image: redis:7-alpine
+  prometheus:
+    image: prom/prometheus:v3.3.0
+    volumes: ["./ops/prometheus.yml:/etc/prometheus/prometheus.yml:ro"]
+    ports: ["127.0.0.1:9090:9090"]
+  grafana:
+    image: grafana/grafana:11.6.0
+    volumes: ["./ops/grafana/provisioning:/etc/grafana/provisioning:ro","./ops/grafana/dashboard.json:/var/lib/grafana/dashboards/journey.json:ro"]
+    ports: ["127.0.0.1:3000:3000"]

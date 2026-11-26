@@ -1,0 +1,15 @@
+.git
+.env*
+__pycache__
+**/__pycache__
+reports
+*.zip
+engine/graph_engine
+generator/rgen
+
+.venv
+
+!data/grt/*.zip
+ops/cloud/.terraform
+**/*.tfstate*
+.git

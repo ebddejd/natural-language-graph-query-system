@@ -1,0 +1,108 @@
+name: Journey platform
+on: [pull_request, push, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+    env:
+      TEST_REDIS_URL: redis://localhost:6379/15
+    steps:
+      - uses: actions/checkout@v4
+      - run: if test -f source.tar.gz; then tar --skip-old-files -xzf source.tar.gz; fi
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements.txt ruff==0.11.13
+      - run: ruff check --select E9,F63,F7,F82 .
+      - run: make test && node tests/geolocation.test.js
+      - run: docker build -t journey:ci .
+  live:
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    needs: regression
+    environment: model-evaluation
+    steps:
+      - uses: actions/checkout@v4
+      - run: if test -f source.tar.gz; then tar --skip-old-files -xzf source.tar.gz; fi
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install -r requirements.txt
+      - run: python journey_eval.py --threshold .90
+        env:
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_MODEL: ${{ vars.LLM_MODEL }}
+          INPUT_USD_PER_M: ${{ vars.INPUT_USD_PER_M }}
+          OUTPUT_USD_PER_M: ${{ vars.OUTPUT_USD_PER_M }}
+          RATE_DATE: ${{ vars.RATE_DATE }}
+          CACHED_USD_PER_M: ${{ vars.CACHED_USD_PER_M }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: live-journey-evaluation, path: reports/journey-live.json}
+  release:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [live, replica]
+    runs-on: ubuntu-latest
+    permissions: {contents: read, packages: write}
+    environment: production
+    steps:
+      - name: Validate Render configuration
+        env:
+          HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+          PUBLIC_URL: ${{ vars.PUBLIC_URL }}
+        run: |
+          if [[ -z "$HOOK" || -z "$PUBLIC_URL" ]]; then
+            echo "::error::Set RENDER_DEPLOY_HOOK and PUBLIC_URL in the production environment."
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - run: |
+          image="ghcr.io/${GITHUB_REPOSITORY,,}:$GITHUB_SHA"
+          docker build -t "$image" .
+          docker push "$image"
+      - name: Deploy and verify the exact commit
+        env:
+          HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+          PUBLIC_URL: ${{ vars.PUBLIC_URL }}
+        run: |
+          curl --fail --silent --show-error -G "$HOOK" --data-urlencode "ref=$GITHUB_SHA" >/dev/null
+          python scripts/smoke.py "$PUBLIC_URL" --revision "$GITHUB_SHA"
+  replica:
+    runs-on: ubuntu-latest
+    needs: regression
+    steps:
+      - uses: actions/checkout@v4
+      - run: if test -f source.tar.gz; then tar --skip-old-files -xzf source.tar.gz; fi
+      - uses: helm/kind-action@v1
+        with: {cluster_name: journey-ci}
+      - run: docker build -t journey:ci . && kind load docker-image journey:ci --name journey-ci
+      - run: bash scripts/kind-session.sh
+      - run: bash scripts/kind-hpa.sh
+  dashboard:
+    runs-on: ubuntu-latest
+    needs: regression
+    steps:
+      - uses: actions/checkout@v4
+      - run: if test -f source.tar.gz; then tar --skip-old-files -xzf source.tar.gz; fi
+      - run: docker compose -f compose.yaml -f compose.benchmark.yaml up --build -d
+      - uses: grafana/setup-k6-action@v1
+      - name: Collect synthetic HTTP metrics
+        run: |
+          for i in {1..60}; do curl -fsS http://127.0.0.1:10000/healthz && break; sleep 2; done
+          for i in {1..4}; do USERS=20 LOAD_PORT=10000 k6 run scripts/load.js; sleep 6; done
+          curl -fsS http://localhost:9090/api/v1/query --data-urlencode 'query=journey_http_seconds_count{route="/api/navigation",status="200"}' | python -c 'import json,sys;assert json.load(sys.stdin)["data"]["result"]'
+      - name: Capture the provisioned dashboard
+        run: |
+          pip install playwright
+          python -m playwright install chromium --with-deps
+          python scripts/capture_dashboard.py
+      - uses: actions/upload-artifact@v4
+        with: {name: grafana-synthetic, path: reports/grafana-synthetic.png}
