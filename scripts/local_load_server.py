@@ -21,7 +21,7 @@ def completion(*args):
 
 if __name__=='__main__':
     port=int(os.environ.get('LOAD_PORT','18926'))
-    app=HostedApp(f'http://127.0.0.1:{port}')
+    app=HostedApp(os.getenv('PUBLIC_URL',f'http://127.0.0.1:{port}'))
     app.model_limit=10000
     with patch('journey_agent.completion',completion):
-        serve(app,host='127.0.0.1',port=port,threads=12)
+        serve(app,host=os.getenv('LOAD_BIND','127.0.0.1'),port=port,threads=12)

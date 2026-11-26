@@ -1,0 +1,14 @@
+# Isolated synthetic measurement only. No live API keys are needed.
+services:
+  agent:
+    command: ["python","scripts/local_load_server.py"]
+    environment:
+      LOAD_BIND: 0.0.0.0
+      LOAD_PORT: 10000
+      PUBLIC_URL: http://127.0.0.1:10000
+      LLM_API_KEY: ""
+      GEOAPIFY_API_KEY: ""
+  grafana:
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
